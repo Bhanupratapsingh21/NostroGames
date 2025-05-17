@@ -1,6 +1,6 @@
 import "@/once-ui/styles/index.scss";
 import "@/once-ui/tokens/index.scss";
-
+import "./global.css"
 import classNames from "classnames";
 
 import { baseURL, style, meta, font, effects } from "@/app/resources/once-ui.config";
