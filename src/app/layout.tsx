@@ -5,7 +5,6 @@ import classNames from "classnames";
 
 import { baseURL, style, meta, font, effects } from "@/app/resources/once-ui.config";
 import { Background, Column, Flex, ToastProvider, ThemeProvider } from "@/once-ui/components";
-
 import { opacity, SpacingToken } from "@/once-ui/types";
 import { Meta, Schema } from "@/once-ui/modules";
 
