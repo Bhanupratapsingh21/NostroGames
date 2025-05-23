@@ -52,7 +52,7 @@ export default function Home() {
 
           {/* CTA Button */}
           <button
-            onClick={() => router.push("/3sda")}
+            onClick={() => router.push("/Allgames")}
             className="bg-white z-50 text-black text-lg font-medium px-6 py-3 rounded-2xl transition-all w-fit hover:bg-gray-200"
           >
             Explore Collection

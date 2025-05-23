@@ -57,6 +57,7 @@ export default function RootLayout({
         path={meta.home.path}
       />
       <head>
+        <script type="text/javascript" src="https://unpkg.com/jsnes/dist/jsnes.min.js"></script>
         <script
           // biome-ignore lint/security/noDangerouslySetInnerHtml: <It's not dynamic nor a security issue.>
           dangerouslySetInnerHTML={{
