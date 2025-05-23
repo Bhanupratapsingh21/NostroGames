@@ -8,7 +8,7 @@ export default function ExpandableCardDemo() {
   const [active, setActive] = useState<(typeof cards)[number] | boolean | null>(
     null
   );
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>(null) as React.RefObject<HTMLDivElement>;
   const id = useId();
 
   useEffect(() => {
