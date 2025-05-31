@@ -1,20 +1,88 @@
 'use client';
-import React, { useState } from "react";
-import { FileUpload } from "@/components/ui/file-upload";
-import { BackgroundBeamsWithCollision } from "@/components/ui/background-beams-with-collision";
-import { useRouter } from "next/navigation";
-import { FaArrowLeft } from "react-icons/fa";
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { FaArrowLeft } from 'react-icons/fa';
+import { FileUpload } from '@/components/ui/file-upload';
+import { BackgroundBeamsWithCollision } from '@/components/ui/background-beams-with-collision';
 
-export default function FileUploadDemo() {
+// Emulator container
+const EmulatorContainer = ({ romUrl }: { romUrl: string }) => {
+    const [srcDoc, setSrcDoc] = useState<string>('');
+
+    useEffect(() => {
+        if (!romUrl) return;
+
+        const html = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <style>
+          html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            overflow: hidden;
+          }
+          #game {
+            width: 100%;
+            height: 100%;
+          }
+        </style>
+      </head>
+      <body>
+        <div id="game"></div>
+        <script>
+          window.EJS_player = '#game';
+          window.EJS_core = 'nes';
+          window.EJS_pathtodata = 'https://cdn.emulatorjs.org/latest/data/';
+          window.EJS_gameUrl = '${romUrl}';
+          window.EJS_startOnLoaded = true;
+        </script>
+        <script src="https://cdn.emulatorjs.org/latest/data/loader.js"></script>
+      </body>
+      </html>
+    `.trim();
+
+        setSrcDoc(html);
+    }, [romUrl]);
+
+    return (
+        <iframe
+            srcDoc={srcDoc}
+            sandbox="allow-scripts allow-same-origin"
+            style={{
+                width: '100%',
+                height: '500px',
+                border: 'none',
+                borderRadius: '0.75rem',
+                background: 'black',
+            }}
+        />
+    );
+};
+
+export default function PlayCustomROM() {
     const router = useRouter();
-    const [files, setFiles] = useState<File[]>([]);
+    const [romUrl, setRomUrl] = useState<string | null>(null);
+
     const handleFileUpload = (files: File[]) => {
-        setFiles(files);
-        console.log(files);
+        if (files.length > 0) {
+            const file = files[0];
+            const url = URL.createObjectURL(file);
+            setRomUrl(url);
+        }
+    };
+
+    const handleStop = () => {
+        setRomUrl(null);
     };
 
     return (
-        <BackgroundBeamsWithCollision className="bg-black min-h-screen">
+        <div className="bg-black md:pt-20 min-h-screen">
             <button
                 onClick={() => router.back()}
                 className="fixed top-10 left-14 p-3 rounded-full bg-gray-800 bg-opacity-50 backdrop-blur-md 
@@ -23,69 +91,55 @@ export default function FileUploadDemo() {
             >
                 <FaArrowLeft size={20} />
             </button>
-            <div className="min-h-[400px] w-full max-w-4xl mx-auto mt-12 p-8 
-                    bg-gradient-to-br from-gray-900 to-gray-800 bg-opacity-50 
-                    backdrop-blur-lg rounded-2xl border border-gray-700">
 
-                {/* Heading */}
-                <h1 className="text-3xl font-extrabold text-transparent bg-clip-text 
-                     bg-gradient-to-r from-yellow-400 to-pink-500 mb-4">
-                    BYOG — Bring Your Own Game
-                </h1>
+            <div className="max-w-4xl mx-auto p-6 bg-gradient-to-br from-gray-900 to-gray-800 
+                      bg-opacity-50 backdrop-blur-lg rounded-2xl border border-gray-700 shadow-xl">
 
-                {/* Instructions */}
-                <p className="text-gray-300 mb-6">
-                    Want to play your own NES ROMs? Download your favorite NES games from{" "}
-                    <a
-                        href="https://www.emulatorgames.net/roms/nintendo/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-yellow-400 hover:text-yellow-300 underline"
-                    >
-                        emulatorgames.net/roms/nintendo
-                    </a>
-                    . Once you have a <span className="font-mono text-green-300">.nes</span> file,
-                    use the upload area below to load it into the browser. Enjoy classic gaming right here!
-                </p>
+                {!romUrl ? (
+                    <>
+                        <h1 className="text-3xl font-extrabold text-transparent bg-clip-text 
+                           bg-gradient-to-r from-yellow-400 to-pink-500 mb-4">
+                            BYOG — Bring Your Own Game
+                        </h1>
 
-                {/* File Upload Container */}
-                <div className="w-full p-6  bg-opacity-10 bg-black bg-opacity-20 
-                      backdrop-blur-md rounded-xl border-2 border-dashed border-gray-600 
-                      hover:border-gray-500 transition">
-                    <FileUpload onChange={handleFileUpload} />
-                </div>
-
-                {/* Preview of Selected Files */}
-                {files.length > 0 && (
-                    <div className="mt-6 space-y-4">
-                        <h2 className="text-xl font-semibold text-green-300">Selected ROM(s):</h2>
-                        {files.map((fileObj, idx) => (
-                            <div
-                                key={idx}
-                                className="flex justify-between items-center p-4 bg-gray-800 bg-opacity-30 
-                         backdrop-blur-sm rounded-lg"
+                        <p className="text-gray-300 mb-6">
+                            Download NES ROMs from{" "}
+                            <a
+                                href="https://www.emulatorgames.net/roms/nintendo/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-yellow-400 hover:text-yellow-300 underline"
                             >
-                                <div>
-                                    <p className="text-gray-200">{fileObj.name}</p>
-                                    <p className="text-sm text-gray-400">
-                                        {(fileObj.size / 1024).toFixed(2)} KB
-                                    </p>
-                                </div>
-                                <button
-                                    onClick={() => {
-                                        const newFiles = [...files];
-                                        newFiles.splice(idx, 1);
-                                        setFiles(newFiles);
-                                    }}
-                                    className="text-red-400 hover:text-red-600 font-semibold"
-                                >
-                                    Remove
-                                </button>
-                            </div>
-                        ))}
-                    </div>
+                                emulatorgames.net/roms/nintendo
+                            </a>
+                            , then upload a <span className="font-mono text-green-300">.nes</span> file below to play.
+                        </p>
+
+                        <div className="w-full p-6 bg-opacity-10 bg-black bg-opacity-20 
+                            backdrop-blur-md rounded-xl border-2 border-dashed border-gray-600 
+                            hover:border-gray-500 transition">
+                            <FileUpload onChange={handleFileUpload} />
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <div className="w-full h-[500px] bg-black rounded-xl overflow-hidden">
+                            <EmulatorContainer romUrl={romUrl} />
+                        </div>
+
+                        <div className="mt-6 flex justify-end">
+                            <button
+                                onClick={handleStop}
+                                className="px-6 py-2 rounded-xl font-bold text-white
+                           bg-gradient-to-br from-red-600 to-red-800 bg-opacity-30 backdrop-blur-md
+                           shadow-lg border border-white/20 hover:from-red-700 hover:to-red-900 transition"
+                            >
+                                Stop Game
+                            </button>
+                        </div>
+                    </>
                 )}
             </div>
-        </BackgroundBeamsWithCollision>
+        </div>
     );
 }
