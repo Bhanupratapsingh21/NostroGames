@@ -5,7 +5,7 @@ import retroGames from '@/Data/Games';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useRef, useEffect, useId } from 'react';
 import { useOutsideClick } from '@/hooks/use-outside-click';
-import { gametypes } from '../../../../nostrogame/src/types/Game.type';
+import { gametypes } from '@/types/Game.type';
 import { FaArrowLeft } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 

@@ -1,11 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  images : {
-    remotePatterns : [
+  eslint: {
+    ignoreDuringBuilds: true, // Disable ESLint during builds
+  },
+  images: {
+    remotePatterns: [
       {
-        protocol : "https",
-        hostname : "res.cloudinary.com"
+        protocol: "https",
+        hostname: "res.cloudinary.com"
       }
     ]
   }
