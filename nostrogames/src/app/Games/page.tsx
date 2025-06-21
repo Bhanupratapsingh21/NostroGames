@@ -1,26 +1,57 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import {
-  FaUserFriends,
-  FaArrowUp,
-  FaArrowDown,
-  FaArrowLeft,
-  FaArrowRight,
-} from 'react-icons/fa';
-import EyeIcon from '@/components/Icons/eye';
+import { FaArrowLeft, FaGamepad, FaSyncAlt } from 'react-icons/fa';
+import { IoMdClose } from 'react-icons/io';
 import { gametypes } from '@/types/Game.type';
 import retroGames from '@/Data/Games';
-import EmulatorContainer from '@/components/EmulatorContainer'; // adjust the path if needed
+import EmulatorContainer from '@/components/EmulatorContainer';
 
 export default function GameOnePage() {
   const [game, setGame] = useState<gametypes>();
   const [isGameRunning, setIsGameRunning] = useState(false);
   const [romUrl, setRomUrl] = useState<string>('');
+  const [isPortrait, setIsPortrait] = useState(false);
+  const [showOrientationModal, setShowOrientationModal] = useState(false);
+  const gameContainerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  // On mount, pick up ?game=ID
+  // Check orientation and handle changes
+  useEffect(() => {
+    const checkOrientation = () => {
+      const portrait = window.matchMedia('(orientation: portrait)').matches;
+      setIsPortrait(portrait);
+      setShowOrientationModal(portrait && isGameRunning);
+    };
+
+    checkOrientation();
+    window.addEventListener('resize', checkOrientation);
+    return () => window.removeEventListener('resize', checkOrientation);
+  }, [isGameRunning]);
+
+  // Lock orientation to landscape when game starts (iOS 13+)
+  useEffect(() => {
+    if (isGameRunning) {
+      try {
+        // @ts-ignore - This is for iOS Safari
+        screen.orientation?.lock('landscape');
+      } catch (e) {
+        console.log('Orientation lock not supported');
+      }
+    }
+
+    return () => {
+      try {
+        // @ts-ignore
+        screen.orientation?.unlock();
+      } catch (e) {
+        console.log('Orientation unlock failed');
+      }
+    };
+  }, [isGameRunning]);
+
+  // Load game data
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const id = params.get('game');
@@ -34,32 +65,36 @@ export default function GameOnePage() {
   }, []);
 
   const handlePlay = () => {
-    // When clicking “Play”, show the <iframe> with romUrl
     setIsGameRunning(true);
+    // Show orientation modal if in portrait mode
+    if (window.matchMedia('(orientation: portrait)').matches) {
+      setShowOrientationModal(true);
+    }
   };
 
   const handleStop = () => {
-    // Unmount the EmulatorContainer (iframe) and clear URL
     setIsGameRunning(false);
     setRomUrl('');
+    setShowOrientationModal(false);
   };
 
   return (
-    // Make this wrapper at least the height of the viewport, and allow vertical scroll
     <div className="bg-gray-900 text-white min-h-screen overflow-y-auto">
+      {/* Back Button */}
       <button
         onClick={() => router.back()}
-        className="fixed top-10 left-14 p-3 rounded-full bg-gray-800 bg-opacity-50 backdrop-blur-md 
-                       border border-white/20 text-white hover:bg-gray-700 transition-all shadow-lg"
+        className="fixed top-4 left-4 z-50 p-3 rounded-full bg-gray-800 bg-opacity-50 backdrop-blur-md 
+                   border border-white/20 text-white hover:bg-gray-700 transition-all shadow-lg"
         aria-label="Go back"
       >
         <FaArrowLeft size={20} />
       </button>
-      <div className="max-w-4xl mx-auto p-4">
-        <div className="bg-gray-800 bg-opacity-50 backdrop-blur-md rounded-xl p-6 shadow-lg">
+
+      <div className="max-w-4xl mx-auto p-4 pt-16">
+        <div className="bg-gray-800 bg-opacity-50 backdrop-blur-md rounded-xl p-4 md:p-6 shadow-lg">
           {!isGameRunning ? (
             <>
-              {/* ▶️ BANNER & PLAY UI */}
+              {/* Game Info View */}
               <div className="mb-6">
                 <div className="w-full overflow-hidden rounded-xl">
                   <Image
@@ -90,128 +125,70 @@ export default function GameOnePage() {
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center font-bold mb-6 space-x-6">
-                <div className="flex items-center space-x-2">
-                  <div className="p-3 bg-white/10 backdrop-blur-sm rounded-full">
-                    <FaUserFriends className="text-white" />
+              <div className="flex flex-wrap items-center font-bold mb-6 gap-4 md:gap-6">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 md:p-3 bg-white/10 backdrop-blur-sm rounded-full">
+                    <FaGamepad className="text-white text-sm md:text-base" />
                   </div>
-                  <span className="text-gray-200">{game?.type || 'Single Player'}</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="p-3 bg-white/10 backdrop-blur-sm rounded-full">
-                    <EyeIcon />
-                  </div>
-                  <span className="text-gray-200">{game?.quote}</span>
+                  <span className="text-gray-200 text-sm md:text-base">{game?.type || 'Single Player'}</span>
                 </div>
               </div>
 
-              <p className="text-gray-300 leading-relaxed mb-6">
+              <p className="text-gray-300 leading-relaxed mb-6 text-sm md:text-base">
                 {game?.description}
               </p>
             </>
           ) : (
             <>
-              {/* 🎮 EMBEDDED EMULATOR (iframe) */}
-              <div className="w-full h-[480px] bg-black rounded-xl overflow-hidden">
+              {/* Game Running View */}
+              <div
+                ref={gameContainerRef}
+                className="relative w-full aspect-video bg-black rounded-xl overflow-hidden"
+              >
                 {romUrl && <EmulatorContainer romUrl={romUrl} />}
-              </div>
 
-              {/* 🛑 STOP BUTTON */}
-              <div className="mt-6 flex justify-between">
-                <button
-                  className="px-6 py-2 rounded-xl font-bold text-white
-                       bg-gradient-to-br from-blue-500 to-blue-700 bg-opacity-30 backdrop-blur-md
-                       shadow-lg border border-white/20 hover:from-blue-600 hover:to-blue-800 transition mr-4"
-                  aria-label="Use Keyboard"
-                  type="button"
-                  tabIndex={-1}
-                  disabled
-                >
-                  Use Button In Your Keyboard As It’s Shown Below
-                </button>
-
-                <button
-                  onClick={handleStop}
-                  className="px-6 py-2 rounded-xl font-bold text-white
-                             bg-gradient-to-br from-red-600 to-red-800 bg-opacity-30 backdrop-blur-md
-                             shadow-lg border border-white/20 hover:from-red-700 hover:to-red-900 transition"
-                >
-                  Stop Game
-                </button>
-              </div>
-
-              {/* 🎛️ ON-SCREEN CONTROLLER UI */}
-              <div className="mt-12 flex md:flex-row justify-between px-14 flex-col items-center space-y-8">
-                {/* D-PAD */}
-                <div className="grid grid-cols-3 grid-rows-3 gap-2">
-                  <div /> {/* empty */}
-                  <button
-                    className="w-14 h-14 flex items-center justify-center rounded-full
-                               bg-gradient-to-br from-indigo-600 to-purple-600 bg-opacity-30
-                               backdrop-blur-md text-white text-lg font-bold shadow-lg border border-white/20"
-                    aria-label="Up"
-                  >
-                    <FaArrowUp />
-                  </button>
-                  <div /> {/* empty */}
-                  <button
-                    className="w-14 h-14 flex items-center justify-center rounded-full
-                               bg-gradient-to-br from-indigo-600 to-purple-600 bg-opacity-30
-                               backdrop-blur-md text-white text-lg font-bold shadow-lg border border-white/20"
-                    aria-label="Left"
-                  >
-                    <FaArrowLeft />
-                  </button>
-                  <div /> {/* center blank */}
-                  <button
-                    className="w-14 h-14 flex items-center justify-center rounded-full
-                               bg-gradient-to-br from-indigo-600 to-purple-600 bg-opacity-30
-                               backdrop-blur-md text-white text-lg font-bold shadow-lg border border-white/20"
-                    aria-label="Right"
-                  >
-                    <FaArrowRight />
-                  </button>
-                  <div /> {/* empty */}
-                  <button
-                    className="w-14 h-14 flex items-center justify-center rounded-full
-                               bg-gradient-to-br from-indigo-600 to-purple-600 bg-opacity-30
-                               backdrop-blur-md text-white text-lg font-bold shadow-lg border border-white/20"
-                    aria-label="Down"
-                  >
-                    <FaArrowDown />
-                  </button>
-                  <div /> {/* empty */}
-                </div>
-
-                {/* Action Buttons: Z, X, Enter */}
-                <div className="flex flex-col items-center space-y-4">
-                  <div className="flex space-x-6">
+                {/* Orientation Warning Modal */}
+                {showOrientationModal && (
+                  <div className="absolute inset-0 bg-black/90 z-20 flex flex-col items-center justify-center p-6 text-center">
+                    <div className="animate-spin-slow mb-6">
+                      <FaSyncAlt size={48} className="text-yellow-400" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-white mb-2">Rotate Your Device</h3>
+                    <p className="text-gray-300 mb-6">
+                      For the best gaming experience, please rotate your device to landscape mode.
+                    </p>
                     <button
-                      className="w-14 h-14 flex items-center justify-center rounded-full
-                                 bg-gradient-to-br from-pink-500 to-red-500 bg-opacity-30
-                                 backdrop-blur-md text-white text-lg font-bold shadow-lg border border-white/20"
-                      aria-label="Button Z"
+                      onClick={() => setShowOrientationModal(false)}
+                      className="px-6 py-2 rounded-lg font-medium text-white
+                                 bg-gradient-to-br from-blue-500 to-blue-700 transition"
                     >
-                      Z
-                    </button>
-                    <button
-                      className="w-14 h-14 flex items-center justify-center rounded-full
-                                 bg-gradient-to-br from-pink-500 to-red-500 bg-opacity-30
-                                 backdrop-blur-md text-white text-lg font-bold shadow-lg border border-white/20"
-                      aria-label="Button X"
-                    >
-                      X
+                      Continue Anyway
                     </button>
                   </div>
+                )}
+              </div>
+
+              {/* Controls Section */}
+              <div className="mt-6">
+                <div className="flex justify-between items-center">
+                  <div className="hidden md:flex items-center gap-2 text-sm text-gray-300">
+                    <FaGamepad className="text-blue-400" />
+                    <span>Use keyboard: Arrow keys, Z, X, Enter</span>
+                  </div>
+
                   <button
-                    className="px-8 py-2 rounded-full font-bold text-white
-                               bg-gradient-to-br from-yellow-500 to-yellow-700 bg-opacity-30
-                               backdrop-blur-md shadow-lg border border-white/20
-                               hover:from-yellow-600 hover:to-yellow-800 transition"
-                    aria-label="Enter"
+                    onClick={handleStop}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-white
+                               bg-gradient-to-br from-red-600 to-red-800 bg-opacity-30 backdrop-blur-md
+                               shadow-lg border border-white/20 hover:from-red-700 hover:to-red-900 transition"
                   >
-                    Enter
+                    <IoMdClose /> Stop Game
                   </button>
+                </div>
+
+                {/* Mobile Controls Info */}
+                <div className="md:hidden mt-4 text-sm text-gray-400 text-center">
+                  <p>Touch controls are automatically enabled in landscape mode</p>
                 </div>
               </div>
             </>

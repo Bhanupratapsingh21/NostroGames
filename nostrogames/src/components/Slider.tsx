@@ -9,9 +9,8 @@ import { gametypes } from '@/types/Game.type';
 import { FaArrowLeft, FaArrowRight, FaArrowLeftLong } from 'react-icons/fa6';
 import { useRouter } from 'next/navigation';
 import { FiArrowRight } from 'react-icons/fi';
-import Slider from '@/components/Slider';
 
-const MiniGamesSection = () => {
+const Slider = () => {
     const [activeGame, setActiveGame] = useState<gametypes | null>(null);
     const [currentSlide, setCurrentSlide] = useState(0);
     const ref = useRef<HTMLDivElement>(null) as React.RefObject<HTMLDivElement>;
@@ -51,84 +50,95 @@ const MiniGamesSection = () => {
     };
 
     return (
-        <div className="w-full bg-gradient-to-br from-gray-900 via-purple-900 to-gray-800 px-4 sm:px-6 lg:px-8 py-16 relative min-h-screen">
-            {/* Back Button */}
-            <button
-                onClick={() => router.back()}
-                className="fixed top-6 left-6 z-30 p-3 rounded-full bg-gray-800 bg-opacity-50 backdrop-blur-md 
-                           border border-white/20 text-white hover:bg-gray-700 transition-all shadow-lg flex items-center gap-2"
-                aria-label="Go back"
-            >
-                <FaArrowLeftLong size={20} />
-                <span className="hidden sm:inline">Back</span>
-            </button>
+        <div className="w-full">
 
-            {/* Hero Section */}
-            <div className="max-w-7xl mx-auto text-center mb-16 mt-8">
-                <h1 className="text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-400 to-cyan-400 mb-6">
-                    Classic Games Collection
-                </h1>
-                <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto">
-                    Relive your childhood memories with our curated collection of timeless retro games.
-                </p>
-            </div>
-
-            <Slider />
-
-            {/* All Games Grid */}
-            <section className="max-w-7xl mx-auto">
-                <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-pink-400 mb-8">
-                    All Games
-                </h2>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {allGames.map((game) => (
-                        <motion.div
-                            layoutId={`card-${game.id}-${id}`}
-                            key={game.id}
-                            onClick={() => setActiveGame(game)}
-                            whileHover={{ y: -5 }}
-                            className="group flex flex-col rounded-xl bg-gray-800/50 backdrop-blur-lg border border-gray-700 hover:border-cyan-400/30 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/10 cursor-pointer overflow-hidden"
+            {/* Featured Games Slider */}
+            <section className="mb-24 relative max-w-7xl mx-auto">
+                <div className="flex items-center justify-between mb-8">
+                    <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-300">
+                        Featured Games
+                    </h2>
+                    <div className="flex gap-4">
+                        <button
+                            onClick={prevSlide}
+                            className="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors border border-gray-700"
+                            aria-label="Previous slide"
                         >
-                            <div className="relative h-64 w-full overflow-hidden">
-                                <Image
-                                    src={game.imgUrl}
-                                    alt={game.name}
-                                    fill
-                                    unoptimized
-                                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                                />
-                            </div>
+                            <FaArrowLeft className="text-white" />
+                        </button>
+                        <button
+                            onClick={nextSlide}
+                            className="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors border border-gray-700"
+                            aria-label="Next slide"
+                        >
+                            <FaArrowRight className="text-white" />
+                        </button>
+                    </div>
+                </div>
 
-                            <div className="p-6">
-                                <div className="flex justify-between items-start">
-                                    <div>
-                                        <h3 className="text-xl font-bold text-white">{game.name}</h3>
-                                        <p className="text-cyan-400 text-sm mt-1">{game.type}</p>
+                <div className="relative h-[500px] w-full overflow-hidden rounded-2xl">
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={currentSlide}
+                            initial={{ opacity: 0, x: 100 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -100 }}
+                            transition={{ duration: 0.5 }}
+                            className="absolute inset-0"
+                        >
+                            <div className="relative h-full w-full">
+                                <Image
+                                    src={featuredGames[currentSlide].imgUrl}
+                                    alt={featuredGames[currentSlide].name}
+                                    fill
+                                    className="object-cover"
+                                    unoptimized
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent" />
+                                <div className="absolute bottom-0 left-0 p-8 w-full">
+                                    <div className="max-w mx-auto">
+                                        <h3 className="text-3xl md:text-5xl font-bold text-white mb-2">
+                                            {featuredGames[currentSlide].name}
+                                        </h3>
+                                        <p className="text-cyan-400 text-lg mb-4">
+                                            {featuredGames[currentSlide].type}
+                                        </p>
+                                        <p className="text-gray-300 mb-6 line-clamp-2">
+                                            {featuredGames[currentSlide].description}
+                                        </p>
+                                        <div className="flex gap-4">
+                                            <button
+                                                onClick={() => setActiveGame(featuredGames[currentSlide])}
+                                                className="px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-lg font-medium text-white transition-colors border border-white/20"
+                                            >
+                                                View Details
+                                            </button>
+                                            <Link
+                                                href={`/Games?game=${featuredGames[currentSlide].id}`}
+                                                className="px-6 py-3 bg-cyan-500 hover:bg-cyan-600 rounded-lg font-medium text-white transition-colors flex items-center gap-2"
+                                            >
+                                                Play Now <FiArrowRight />
+                                            </Link>
+                                        </div>
                                     </div>
-                                    <span className="bg-gray-900/80 text-cyan-400 text-xs px-2 py-1 rounded-full">
-                                        {game.type}
-                                    </span>
                                 </div>
-                                <p className="text-sm text-gray-300 mt-3 line-clamp-2">{game.quote}</p>
                             </div>
                         </motion.div>
+                    </AnimatePresence>
+                </div>
+
+                {/* Slider Indicators */}
+                <div className="flex justify-center gap-2 mt-6">
+                    {featuredGames.map((_, index) => (
+                        <button
+                            key={index}
+                            onClick={() => setCurrentSlide(index)}
+                            className={`w-3 h-3 rounded-full transition-all ${currentSlide === index ? 'bg-cyan-400 w-6' : 'bg-gray-600'}`}
+                            aria-label={`Go to slide ${index + 1}`}
+                        />
                     ))}
                 </div>
             </section>
-
-            {/* BYOG CTA */}
-            <div className="max-w-7xl mx-auto text-center mt-20 mb-10">
-                <Link
-                    href="/BYOG"
-                    className="inline-block px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl text-lg font-semibold text-white hover:shadow-lg hover:shadow-purple-500/30 transition-all group"
-                >
-                    Don't see your favorite game?{' '}
-                    <span className="font-bold group-hover:text-cyan-300 transition-colors">
-                        Bring Your Own Game! <FiArrowRight className="inline ml-1" />
-                    </span>
-                </Link>
-            </div>
 
             {/* Expanded Game Modal */}
             <AnimatePresence>
@@ -220,4 +230,4 @@ const MiniGamesSection = () => {
     );
 };
 
-export default MiniGamesSection;
+export default Slider;
