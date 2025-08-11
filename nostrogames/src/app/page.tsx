@@ -358,7 +358,7 @@ export default function Home() {
           animate={{ opacity: 1 }}
           transition={{ delay: 1, duration: 0.5 }}
         >
-          created by <a href="https://bpss.tech/" className="hover:text-white/80 transition-colors">@bpss.tech</a>
+          created by <a href="https://bpss.tech/" className="hover:text-white/80 transition-colors">@bpss.tech & Krithika</a> 
         </motion.div>
       )}
     </div>
