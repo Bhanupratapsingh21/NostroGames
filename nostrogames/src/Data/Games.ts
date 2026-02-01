@@ -91,15 +91,6 @@ const retroGames = [
     },
     {
         id: 11,
-        name: "Rad Racer",
-        imgUrl: "https://res.cloudinary.com/djwzwq4cu/image/upload/v1750516721/20250621_1954_Retro_Arcade_Racing_simple_compose_01jy9dx4dvefzskqz7bvd9wm5x_rgrduk.png",
-        description: "3D-style racing game with time-based checkpoints, dodge traffic and make it to the finish before time runs out.",
-        type: "One Player",
-        quote: "Played by 20% of our users",
-        nesUrl: "hhttps://res.cloudinary.com/djwzwq4cu/image/upload/v1750516721/20250621_1954_Retro_Arcade_Racing_simple_compose_01jy9dx4dvefzskqz7bvd9wm5x_rgrduk.png"
-    },
-    {
-        id: 12,
         name: "F1 Race (Japan)",
         imgUrl: "https://res.cloudinary.com/djwzwq4cu/image/upload/v1750516719/20250621_1955_Retro_Formula_Race_simple_compose_01jy9dxzfvfgtbaeynfrkn5y29_wpgzyj.png",
         description: "Fast-paced Formula 1 racing game with multiple tracks and the need for pit stops to refuel mid-race.",
@@ -108,7 +99,7 @@ const retroGames = [
         nesUrl: "https://res.cloudinary.com/djwzwq4cu/raw/upload/v1750515489/F1_Race_Japan_b8zsxq.nes"
     },
     {
-        id: 13,
+        id: 12,
         name: "Road Fighter",
         imgUrl: "https://res.cloudinary.com/djwzwq4cu/image/upload/v1750516727/20250621_1956_8-Bit_Arcade_Racing_simple_compose_01jy9e1aa1ewcvd56pty2y4c8p_nkumu3.png",
         description: "Top-down arcade racing game where players dodge traffic, avoid crashes, and grab fuel cars to stay in the race.",
