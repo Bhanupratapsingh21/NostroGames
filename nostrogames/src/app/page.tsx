@@ -4,363 +4,163 @@ import { Boxes } from "@/components/ui/background-boxes";
 import { IoLogoGameControllerB, IoLogoGameControllerA } from 'react-icons/io';
 import { FiArrowRight, FiPlus, FiSend } from 'react-icons/fi';
 import Image from 'next/image';
-import {
-  CardContainer,
-  CardBody,
-  CardItem,
-} from '@/components/ui/3d-card';
+import { CardContainer, CardBody, CardItem } from '@/components/ui/3d-card';
 import { useRouter } from 'next/navigation';
-import "./globals.css"
 import ColourfulText from "@/components/ui/colourful-text";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Dialog } from '@headlessui/react';
 
 export default function Home() {
   const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    gameRequest: '',
-    type: 'request'
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [formData, setFormData] = useState({ name: '', email: '', gameRequest: '', type: 'request' });
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  useEffect(() => { setIsMounted(true); }, []);
 
-  // Only generate random values on client side
-  const particles = isMounted ? Array.from({ length: 20 }, (_, i) => ({
-    id: i,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    size: Math.random() * 10 + 5,
-    duration: Math.random() * 10 + 10
-  })) : [];
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      const response = await fetch('https://api.web3forms.com/submit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          access_key: process.env.NEXT_PUBLIC_API_KEY, // Replace with your actual key
-          subject: `New Game ${formData.type === 'request' ? 'Request' : 'Submission'} On Nostrogames`,
-        }),
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        setSubmitSuccess(true);
-        setFormData({
-          name: '',
-          email: '',
-          gameRequest: '',
-          type: formData.type
-        });
-        setTimeout(() => {
-          setIsFormOpen(false);
-          setSubmitSuccess(false);
-        }, 2000);
-      }
-    } catch (error) {
-      console.error('Error submitting form:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  if (!isMounted) return null;
 
   return (
-    <div className="relative w-full min-h-screen overflow-hidden bg-slate-900 flex flex-col items-center justify-center">
-      {/* Gradient Overlay */}
-      <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 z-20 [mask-image:radial-gradient(transparent,white)] pointer-events-none" />
+    <div className="relative w-full min-h-screen overflow-hidden bg-grid-pattern flex flex-col items-center justify-center font-main">
+      
+      {/* Colorful Floating Blobs for a "Pop" feel */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        <motion.div animate={{ scale: [1, 1.2, 1], x: [0, 50, 0] }} transition={{ duration: 10, repeat: Infinity }} className="absolute -top-20 -left-20 w-96 h-96 bg-yellow-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30" />
+        <motion.div animate={{ scale: [1, 1.5, 1], x: [0, -50, 0] }} transition={{ duration: 12, repeat: Infinity }} className="absolute top-1/2 -right-20 w-80 h-80 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30" />
+        <motion.div animate={{ scale: [1, 1.2, 1], y: [0, 50, 0] }} transition={{ duration: 8, repeat: Infinity }} className="absolute -bottom-20 left-1/3 w-96 h-96 bg-cyan-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30" />
+      </div>
 
-      {/* Animated Background */}
-      <Boxes />
-
-      {/* Floating Particles - Client only */}
-      {isMounted && (
-        <div className="absolute inset-0 z-0">
-          {particles.map((particle) => (
-            <motion.div
-              key={particle.id}
-              className="absolute rounded-full bg-purple-500/20"
-              initial={{
-                x: particle.x,
-                y: particle.y,
-                scale: Math.random() * 0.5 + 0.5,
-                opacity: 0
-              }}
-              animate={{
-                x: Math.random() * 100,
-                y: Math.random() * 100,
-                opacity: 0.5,
-                transition: {
-                  duration: particle.duration,
-                  repeat: Infinity,
-                  repeatType: "reverse"
-                }
-              }}
-              style={{
-                width: `${particle.size}px`,
-                height: `${particle.size}px`,
-              }}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* Main Content */}
-      <div className="relative z-30 flex flex-col h-screen lg:flex-row items-center justify-between px-6 lg:px-20 py-10 gap-12 max-w-screen-xl mx-auto">
-        {/* Left: Text Section */}
-        <motion.div
-          className="w-full lg:w-1/2 flex flex-col gap-8"
-          initial={{ opacity: 0, y: 20 }}
-          animate={isMounted ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8 }}
-        >
-          {/* Badge */}
+      <div className="relative z-30 flex flex-col lg:flex-row items-center justify-between px-6 lg:px-20 py-10 gap-12 max-w-screen-xl mx-auto">
+        
+        {/* Left Section */}
+        <motion.div className="w-full lg:w-1/2 flex flex-col gap-6">
+          
+          {/* Tag */}
           <motion.div
-            className="flex items-center gap-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-white text-sm px-6 py-3 w-max rounded-full border border-white/10 font-mono backdrop-blur-md"
-            initial={{ opacity: 0, x: -20 }}
-            animate={isMounted ? { opacity: 1, x: 0 } : {}}
-            transition={{ delay: 0.2, duration: 0.5 }}
+            initial={{ rotate: -2, scale: 0.9 }}
+            animate={{ rotate: 0, scale: 1 }}
+            className="flex items-center gap-3 bg-black text-white px-4 py-2 w-max border-2 border-black neubrutalism-shadow"
           >
-            <IoLogoGameControllerB className="text-lg" />
-            <div className="w-px h-4 bg-white/40" />
-            <span>Your Nostalgia Just Got Dangerous</span>
+            <IoLogoGameControllerB className="text-yellow-400 animate-bounce" />
+            <span className="font-retro text-[10px] uppercase tracking-tighter">Level 01: Nostalgia</span>
           </motion.div>
 
-          {/* Heading */}
-          <motion.h1
-            className="text-5xl lg:text-7xl font-bold text-white leading-tight"
-            initial={{ opacity: 0, y: 20 }}
-            animate={isMounted ? { opacity: 1, y: 0 } : {}}
-            transition={{ delay: 0.4, duration: 0.8 }}
-          >
-            Rediscover Classic <br />
-            <ColourfulText text="Gaming" />
-          </motion.h1>
+          <h1 className="text-6xl lg:text-8xl font-black text-black leading-none tracking-tight">
+            PLAY THE <br />
+            <ColourfulText text="CLASSICS" />
+          </h1>
 
-          {/* Description */}
-          <motion.p
-            className="md:text-xl text-md text-gray-300 leading-relaxed max-w-lg"
-            initial={{ opacity: 0 }}
-            animate={isMounted ? { opacity: 1 } : {}}
-            transition={{ delay: 0.6, duration: 0.8 }}
-          >
-            Step into nostalgia reimagined with NostroGames. A minimalist, modern approach to the games that defined an era.
-          </motion.p>
+          <p className="text-xl text-gray-700 font-medium border-l-4 border-black pl-4">
+            No downloads. No setups. Just pure 8-bit joy. Step into the colorful world of retro gaming.
+          </p>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-wrap gap-4">
-            <motion.button
+          {/* Action Buttons */}
+          <div className="flex flex-wrap gap-6 pt-4">
+            <button
               onClick={() => router.push("/Allgames")}
-              className="group relative bg-gradient-to-r from-purple-600 to-pink-600 text-white text-lg font-medium px-8 py-4 rounded-2xl transition-all w-fit hover:shadow-lg hover:shadow-purple-500/30 flex items-center gap-2 overflow-hidden"
-              initial={{ opacity: 0 }}
-              animate={isMounted ? { opacity: 1 } : {}}
-              transition={{ delay: 0.8, duration: 0.5 }}
-              whileHover={isMounted ? { scale: 1.05 } : {}}
-              whileTap={isMounted ? { scale: 0.95 } : {}}
+              className="bg-red-500 text-white font-bold px-8 py-4 border-4 border-black neubrutalism-shadow neubrutalism-shadow-hover transition-all flex items-center gap-3 uppercase italic"
             >
-              <span className="relative z-10">Explore Collection</span>
-              <FiArrowRight className="relative z-10 transition-transform group-hover:translate-x-1" />
-              <span className="absolute inset-0 bg-gradient-to-r from-purple-700 to-pink-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-            </motion.button>
+              Start Game <FiArrowRight strokeWidth={3} />
+            </button>
 
-            <motion.button
-              onClick={() => {
-                router.push("/BYOG")
-              }}
-              className="group relative bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-lg font-medium px-8 py-4 rounded-2xl transition-all w-fit hover:shadow-lg hover:shadow-blue-500/30 flex items-center gap-2 overflow-hidden"
-              initial={{ opacity: 0 }}
-              animate={isMounted ? { opacity: 1 } : {}}
-              transition={{ delay: 0.9, duration: 0.5 }}
-              whileHover={isMounted ? { scale: 1.05 } : {}}
-              whileTap={isMounted ? { scale: 0.95 } : {}}
+            <button
+              onClick={() => router.push("/BYOG")}
+              className="bg-cyan-400 text-black font-bold px-8 py-4 border-4 border-black neubrutalism-shadow neubrutalism-shadow-hover transition-all flex items-center gap-3 uppercase italic"
             >
-              <span className="relative z-10">Bring Your Game</span>
-              <FiPlus className="relative z-10 transition-transform group-hover:rotate-90" />
-              <span className="absolute inset-0 bg-gradient-to-r from-blue-700 to-indigo-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-            </motion.button>
-
-            <motion.button
-              onClick={() => {
-                setFormData(prev => ({ ...prev, type: 'request' }));
-                setIsFormOpen(true);
-              }}
-              className="group relative bg-gradient-to-r from-green-600 to-teal-600 text-white text-lg font-medium px-8 py-4 rounded-2xl transition-all w-fit hover:shadow-lg hover:shadow-green-500/30 flex items-center gap-2 overflow-hidden"
-              initial={{ opacity: 0 }}
-              animate={isMounted ? { opacity: 1 } : {}}
-              transition={{ delay: 1.0, duration: 0.5 }}
-              whileHover={isMounted ? { scale: 1.05 } : {}}
-              whileTap={isMounted ? { scale: 0.95 } : {}}
-            >
-              <span className="relative z-10">Request a Game</span>
-              <IoLogoGameControllerA className="relative z-10" />
-              <span className="absolute inset-0 bg-gradient-to-r from-green-700 to-teal-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-            </motion.button>
+              Upload ROM <FiPlus strokeWidth={3} />
+            </button>
           </div>
+
+          <button
+            onClick={() => { setFormData(prev => ({ ...prev, type: 'request' })); setIsFormOpen(true); }}
+            className="w-fit text-sm font-retro text-pink-600 hover:underline mt-2 flex items-center gap-2"
+          >
+            <IoLogoGameControllerA /> Request a specific game?
+          </button>
         </motion.div>
 
-        {/* Right: 3D Card Image Section */}
-        <motion.div
-          className="w-full h-max md:flex lg:w-1/2 justify-center"
-          initial={{ opacity: 0, x: 50 }}
-          animate={isMounted ? { opacity: 1, x: 0 } : {}}
-          transition={{ delay: 0.5, duration: 0.8 }}
-        >
-          <CardContainer className="inter-var w-full max-w-[500px]">
-            <CardBody className="relative group/card bg-gradient-to-br from-slate-800 to-slate-900 border border-white/10 hover:shadow-2xl hover:shadow-purple-500/20 w-full h-auto rounded-2xl p-6 transition-all duration-300">
-              <CardItem
-                translateZ="100"
-                className="w-full"
-                style={{ transform: 'scale(1.1)' }}
-              >
-                <Image
-                  src="https://res.cloudinary.com/dhvkjanwa/image/upload/v1747502053/20250517_2229_Cartoon_Arcade_Controller_simple_compose_01jvfjxys0fjtr667dv88p60fy_kdwui8.png"
-                  alt="3D Game Controller"
-                  width={1000}
-                  height={1000}
-                  priority
-                  className="w-full h-auto object-contain hover:scale-105 transition-transform duration-500"
-                />
-              </CardItem>
+        {/* Right Section - 3D Card with a Lighter, Poppier feel */}
+        <motion.div className="w-full lg:w-1/2 flex justify-center">
+          <CardContainer className="inter-var">
+            <CardBody className="relative bg-white border-4 border-black neubrutalism-shadow w-full max-w-[450px] h-auto rounded-none p-4 group">
+                {/* Pixel Art Style Accents */}
+                <div className="absolute -top-3 -right-3 w-10 h-10 bg-yellow-400 border-4 border-black z-10" />
+                <div className="absolute -bottom-3 -left-3 w-10 h-10 bg-green-400 border-4 border-black z-10" />
+                
+                <CardItem translateZ="100" className="w-full">
+                    <div className="bg-transparent border-4 border-black p-4">
+                        <Image
+                            src="https://res.cloudinary.com/dhvkjanwa/image/upload/v1747502053/20250517_2229_Cartoon_Arcade_Controller_simple_compose_01jvfjxys0fjtr667dv88p60fy_kdwui8.png"
+                            alt="Arcade Controller"
+                            width={500}
+                            height={500}
+                            className="w-full h-auto object-contain"
+                        />
+                    </div>
+                </CardItem>
+                <div className="mt-4 flex justify-between items-center font-retro text-[10px] text-black">
+                    <span>INSERT COIN</span>
+                    <span className="animate-pulse">PRESS START</span>
+                </div>
             </CardBody>
           </CardContainer>
         </motion.div>
       </div>
 
-      {/* Form Modal */}
-      <Dialog
-        open={isFormOpen}
-        onClose={() => setIsFormOpen(false)}
-        className="relative z-50"
-      >
-        {/* Backdrop */}
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-md" aria-hidden="true" />
+      {/* Form Modal - Light Theme */}
+      <AnimatePresence>
+        {isFormOpen && (
+          <Dialog open={isFormOpen} onClose={() => setIsFormOpen(false)} className="relative z-50">
+            <div className="fixed inset-0 bg-yellow-400/40 backdrop-blur-sm" />
+            <div className="fixed inset-0 flex items-center justify-center p-4">
+              <Dialog.Panel className="w-full max-w-md bg-white border-8 border-black p-8 neubrutalism-shadow relative">
+                <button 
+                    onClick={() => setIsFormOpen(false)}
+                    className="absolute -top-6 -right-6 bg-red-500 text-white border-4 border-black w-12 h-12 font-bold text-xl"
+                >X</button>
+                
+                <Dialog.Title className="text-3xl font-black text-black mb-6 uppercase italic">
+                  {formData.type === 'byog' ? 'Bring Your Game' : 'Request Game'}
+                </Dialog.Title>
 
-        {/* Modal Container */}
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="w-full max-w-md rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-white/10 p-6 shadow-2xl shadow-purple-500/20">
-            <Dialog.Title className="text-2xl font-bold text-white mb-4">
-              {formData.type === 'byog' ? 'Bring Your Own Game' : 'Request a Game'}
-            </Dialog.Title>
-
-            {submitSuccess ? (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-center py-8"
-              >
-                <div className="text-green-500 text-5xl mb-4">✓</div>
-                <h3 className="text-xl font-bold text-white mb-2">Thank You!</h3>
-                <p className="text-gray-300">
-                  Your {formData.type === 'byog' ? 'submission' : 'request'} has been received. We'll get back to you soon!
-                </p>
-              </motion.div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-1">
-                    Your Name
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
-                    Your Email
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="gameRequest" className="block text-sm font-medium text-gray-300 mb-1">
-                    {formData.type === 'byog' ? 'Tell us about your game' : 'Which game would you like to see?'}
-                  </label>
-                  <textarea
-                    id="gameRequest"
-                    name="gameRequest"
-                    value={formData.gameRequest}
-                    onChange={handleInputChange}
-                    required
-                    rows={4}
-                    className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                  />
-                </div>
-
-                <input type="hidden" name="type" value={formData.type} />
-
-                <div className="pt-2">
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${isSubmitting
-                      ? 'bg-purple-700 text-purple-200'
-                      : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:shadow-lg hover:shadow-purple-500/30'
-                      }`}
-                  >
-                    {isSubmitting ? (
-                      'Sending...'
-                    ) : (
-                      <>
-                        <span>{formData.type === 'byog' ? 'Submit Game' : 'Send Request'}</span>
-                        <FiSend className="text-lg" />
-                      </>
-                    )}
+                <form className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-retro uppercase mb-1">Player Name</label>
+                    <input type="text" className="w-full p-3 border-4 border-black bg-gray-50 focus:bg-white outline-none" placeholder="MARIO" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-retro uppercase mb-1">Game Title</label>
+                    <textarea rows={3} className="w-full p-3 border-4 border-black bg-gray-50 focus:bg-white outline-none" placeholder="What's on your mind?" />
+                  </div>
+                  <button className="w-full bg-green-400 text-black font-black py-4 border-4 border-black neubrutalism-shadow hover:translate-y-1 hover:shadow-none transition-all uppercase italic">
+                    Send Signal
                   </button>
-                </div>
-              </form>
-            )}
-          </Dialog.Panel>
-        </div>
-      </Dialog>
+                </form>
+              </Dialog.Panel>
+            </div>
+          </Dialog>
+        )}
+      </AnimatePresence>
 
-      {/* Footer Credit - Client only */}
-      {isMounted && (
-        <motion.div
-          className="absolute bottom-6 right-6 text-white/50 text-sm z-30"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1, duration: 0.5 }}
-        >
-          created by <a href="https://bpss.tech/" className="hover:text-white/80 transition-colors">@bpss.tech & Krithika</a> 
-        </motion.div>
-      )}
+      {/* Footer */}
+      <div className="fixed bottom-6 px-8 flex justify-between w-full items-center gap-2">
+      <div className="flex  items-center gap-1">
+          <div className="flex gap-1">
+            <div className="w-3 h-3 bg-red-500 rounded-full border border-black" />
+            <div className="w-3 h-3 bg-yellow-500 rounded-full border border-black" />
+            <div className="w-3 h-3 bg-green-500 rounded-full border border-black" />
+        </div>
+        <span className="text-[10px] font-retro text-black">SYS_READY</span>
+      </div>
+      <div className="flex  items-center gap-1" >
+          <div className="flex gap-1">
+            <div className="w-3 h-3 bg-red-500 rounded-full border border-black" />
+            <div className="w-3 h-3 bg-yellow-500 rounded-full border border-black" />
+            <div className="w-3 h-3 bg-green-500 rounded-full border border-black" />
+        </div>
+        <span className="text-[10px] font-retro text-black">Created By <a href="https://bpss.tech" target="_blank" rel="noopener noreferrer">BPSS</a></span>
+      </div>
+      </div>
     </div>
   );
 }

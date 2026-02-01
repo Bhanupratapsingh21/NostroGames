@@ -6,127 +6,113 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useRef, useEffect, useId } from 'react';
 import { useOutsideClick } from '@/hooks/use-outside-click';
 import { gametypes } from '@/types/Game.type';
-import { FaArrowLeft, FaArrowRight, FaArrowLeftLong } from 'react-icons/fa6';
+import { FaArrowLeftLong } from 'react-icons/fa6';
 import { useRouter } from 'next/navigation';
-import { FiArrowRight } from 'react-icons/fi';
+import { FiArrowRight, FiPlay } from 'react-icons/fi';
 import Slider from '@/components/Slider';
 
 const MiniGamesSection = () => {
     const [activeGame, setActiveGame] = useState<gametypes | null>(null);
-    const [currentSlide, setCurrentSlide] = useState(0);
     const ref = useRef<HTMLDivElement>(null) as React.RefObject<HTMLDivElement>;
     const id = useId();
     const router = useRouter();
-    const sliderRef = useRef<HTMLDivElement>(null);
 
-    // Featured games for the slider (first 6 games or custom selection)
-    const featuredGames = retroGames.slice(0, 6);
     const allGames = retroGames;
-
-    useEffect(() => {
-        function onKeyDown(event: KeyboardEvent) {
-            if (event.key === 'Escape') {
-                setActiveGame(null);
-            }
-        }
-
-        if (activeGame) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'auto';
-        }
-
-        window.addEventListener('keydown', onKeyDown);
-        return () => window.removeEventListener('keydown', onKeyDown);
-    }, [activeGame]);
 
     useOutsideClick(ref, () => setActiveGame(null));
 
-    const nextSlide = () => {
-        setCurrentSlide((prev) => (prev === featuredGames.length - 1 ? 0 : prev + 1));
-    };
-
-    const prevSlide = () => {
-        setCurrentSlide((prev) => (prev === 0 ? featuredGames.length - 1 : prev - 1));
-    };
-
     return (
-        <div className="w-full bg-gradient-to-br from-gray-900 via-purple-900 to-gray-800 px-4 sm:px-6 lg:px-8 py-16 relative min-h-screen">
+        <div className="w-full bg-[#fdfdfd] text-black px-4 sm:px-6 lg:px-8 py-16 relative min-h-screen font-retro overflow-hidden">
+            {/* Retro Polka Dot Background */}
+            <div
+                className="absolute inset-0 z-0 opacity-30"
+                style={{ backgroundImage: 'radial-gradient(#000 1.5px, transparent 1.5px)', backgroundSize: '30px 30px' }}
+            ></div>
+
             {/* Back Button */}
             <button
                 onClick={() => router.back()}
-                className="fixed top-6 left-6 z-30 p-3 rounded-full bg-gray-800 bg-opacity-50 backdrop-blur-md 
-                           border border-white/20 text-white hover:bg-gray-700 transition-all shadow-lg flex items-center gap-2"
-                aria-label="Go back"
+                className="fixed top-6 left-6 z-30 px-4 py-2 bg-yellow-400 border-4 border-black flex items-center gap-2 shadow-[4px_4px_0px_0px_#000000] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all font-bold"
             >
                 <FaArrowLeftLong size={20} />
-                <span className="hidden sm:inline">Back</span>
+                <span className="hidden sm:inline">BACK</span>
             </button>
 
             {/* Hero Section */}
-            <div className="max-w-7xl mx-auto text-center mb-16 mt-8">
-                <h1 className="text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-400 to-cyan-400 mb-6">
-                    Classic Games Collection
-                </h1>
-                <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto">
-                    Relive your childhood memories with our curated collection of timeless retro games.
+            <div className="max-w-7xl mx-auto text-center mb-16 relative z-10 mt-8">
+                <motion.h1
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="text-4xl md:text-7xl font-black mb-6 tracking-tight drop-shadow-[6px_6px_0px_#3b82f6]"
+                >
+                    RETRO ARCADE
+                </motion.h1>
+                <p className="text-lg md:text-xl font-bold bg-pink-500 text-white inline-block px-4 py-2 border-2 border-black rotate-2 shadow-[4px_4px_0px_0px_#000000]">
+                    PRESS START TO PLAY!
                 </p>
             </div>
 
-            <Slider />
+            {/* Slider Section Container */}
+            <div className="relative z-10 mb-20 max-w-7xl mx-auto border-4 border-black bg-white shadow-[12px_12px_0px_0px_#000000] p-1">
+                <Slider />
+            </div>
 
             {/* All Games Grid */}
-            <section className="max-w-7xl mx-auto">
-                <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-pink-400 mb-8">
-                    All Games
-                </h2>
+            <section className="max-w-7xl mx-auto relative z-10">
+                <div className="mb-10 inline-flex items-center gap-3 border-b-4 border-black pb-2">
+                    <span className="h-6 w-6 bg-red-500 border-2 border-black rounded-full animate-bounce"></span>
+                    <h2 className="text-3xl font-black text-black">ALL GAMES</h2>
+                </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {allGames.map((game) => (
-                        <motion.div
-                            layoutId={`card-${game.id}-${id}`}
-                            key={game.id}
-                            onClick={() => setActiveGame(game)}
-                            whileHover={{ y: -5 }}
-                            className="group flex flex-col rounded-xl bg-gray-800/50 backdrop-blur-lg border border-gray-700 hover:border-cyan-400/30 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/10 cursor-pointer overflow-hidden"
-                        >
-                            <div className="relative h-64 w-full overflow-hidden">
-                                <Image
-                                    src={game.imgUrl}
-                                    alt={game.name}
-                                    fill
-                                    unoptimized
-                                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                                />
-                            </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {allGames.map((game, idx) => {
+                        // Alternate colors for tags based on index
+                        const tagColors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-400'];
+                        const colorClass = tagColors[idx % tagColors.length];
 
-                            <div className="p-6">
-                                <div className="flex justify-between items-start">
-                                    <div>
-                                        <h3 className="text-xl font-bold text-white">{game.name}</h3>
-                                        <p className="text-cyan-400 text-sm mt-1">{game.type}</p>
+                        return (
+                            <motion.div
+                                layoutId={`card-${game.id}-${id}`}
+                                key={game.id}
+                                onClick={() => setActiveGame(game)}
+                                whileHover={{ scale: 1.03, rotate: -1 }}
+                                className="group bg-white border-4 border-black cursor-pointer shadow-[8px_8px_0px_0px_#000000] hover:shadow-[12px_12px_0px_0px_#ec4899] transition-all duration-200 flex flex-col overflow-hidden"
+                            >
+                                <div className="relative h-56 w-full border-b-4 border-black bg-gray-100 p-2">
+                                    <div className="relative w-full h-full border-2 border-black overflow-hidden">
+                                        <Image
+                                            src={game.imgUrl}
+                                            alt={game.name}
+                                            fill
+                                            unoptimized
+                                            className="object-cover group-hover:scale-110 transition-transform duration-500"
+                                        />
                                     </div>
-                                    <span className="bg-gray-900/80 text-cyan-400 text-xs px-2 py-1 rounded-full">
-                                        {game.type}
-                                    </span>
                                 </div>
-                                <p className="text-sm text-gray-300 mt-3 line-clamp-2">{game.quote}</p>
-                            </div>
-                        </motion.div>
-                    ))}
+
+                                <div className="p-5 flex-grow bg-[#fffbef]">
+                                    <div className="flex justify-between items-start mb-3">
+                                        <h3 className="text-xl font-black text-black line-clamp-1">{game.name}</h3>
+                                        <span className={`${colorClass} text-white border-2 border-black px-2 py-1 text-xs font-bold shadow-[2px_2px_0px_0px_#000000]`}>
+                                            {game.type}
+                                        </span>
+                                    </div>
+                                    <p className="text-sm font-medium text-gray-700 line-clamp-2">{game.quote}</p>
+                                </div>
+                            </motion.div>
+                        );
+                    })}
                 </div>
             </section>
 
             {/* BYOG CTA */}
-            <div className="max-w-7xl mx-auto text-center mt-20 mb-10">
+            <div className="max-w-7xl mx-auto text-center mt-24 mb-10 relative z-10">
                 <Link
                     href="/BYOG"
-                    className="inline-block px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl text-lg font-semibold text-white hover:shadow-lg hover:shadow-purple-500/30 transition-all group"
+                    className="inline-flex items-center bg-green-500 px-8 py-6 text-xl font-black text-white border-4 border-black shadow-[8px_8px_0px_0px_#000000] hover:shadow-none hover:translate-x-2 hover:translate-y-2 transition-all active:bg-green-600 group"
                 >
-                    Don't see your favorite game?{' '}
-                    <span className="font-bold group-hover:text-cyan-300 transition-colors">
-                        Bring Your Own Game! <FiArrowRight className="inline ml-1" />
-                    </span>
+                    <span className="mr-3">BRING YOUR OWN GAME</span>
+                    <FiArrowRight size={24} className="group-hover:translate-x-2 transition-transform" />
                 </Link>
             </div>
 
@@ -134,82 +120,64 @@ const MiniGamesSection = () => {
             <AnimatePresence>
                 {activeGame && (
                     <>
+                        {/* Dim Overlay with slight color */}
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="fixed inset-0 bg-black/70 z-40 backdrop-blur-sm"
+                            className="fixed inset-0 bg-blue-900/60 z-[60] backdrop-blur-sm"
                         />
 
-                        <div className="fixed inset-0 grid place-items-center z-50 p-4">
+                        <div className="fixed inset-0 grid place-items-center z-[70] p-4">
                             <motion.div
                                 layoutId={`card-${activeGame.id}-${id}`}
                                 ref={ref}
-                                className="w-full max-w-4xl h-full md:h-[90vh] flex flex-col bg-gray-800 rounded-xl overflow-hidden border border-gray-700 shadow-2xl"
-                                initial={{ scale: 0.9, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                exit={{ scale: 0.9, opacity: 0 }}
+                                className="w-full max-w-3xl bg-white border-4 border-black shadow-[16px_16px_0px_0px_#ec4899] flex flex-col md:flex-row overflow-hidden"
                             >
-                                <motion.div layoutId={`image-${activeGame.id}-${id}`} className="relative h-96 w-full">
-                                    <Image
-                                        src={activeGame.imgUrl}
-                                        alt={activeGame.name}
-                                        fill
-                                        className="object-cover"
-                                        unoptimized
-                                    />
-                                </motion.div>
-
-                                <div className="p-6 flex-grow overflow-y-auto">
-                                    <div className="flex justify-between items-start">
-                                        <div>
-                                            <motion.h2
-                                                layoutId={`title-${activeGame.id}-${id}`}
-                                                className="text-3xl font-bold text-white"
-                                            >
-                                                {activeGame.name}
-                                            </motion.h2>
-                                            <motion.p
-                                                layoutId={`type-${activeGame.id}-${id}`}
-                                                className="text-lg text-cyan-400 mt-2"
-                                            >
-                                                {activeGame.type}
-                                            </motion.p>
-                                        </div>
-                                        <motion.button
-                                            onClick={() => setActiveGame(null)}
-                                            className="p-2 rounded-full bg-gray-700 hover:bg-gray-600 transition-colors"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
-                                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                                <path d="M18 6l-12 12" />
-                                                <path d="M6 6l12 12" />
-                                            </svg>
-                                        </motion.button>
+                                {/* Left Side: Image */}
+                                <div className="relative w-full md:w-1/2 h-64 md:h-auto border-b-4 md:border-b-0 md:border-r-4 border-black bg-gray-100 p-4">
+                                    <div className="relative w-full h-full border-4 border-black">
+                                        <Image
+                                            src={activeGame.imgUrl}
+                                            alt={activeGame.name}
+                                            fill
+                                            className="object-cover"
+                                            unoptimized
+                                        />
                                     </div>
+                                </div>
 
-                                    <motion.div
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        transition={{ delay: 0.2 }}
-                                        className="mt-6 text-gray-300 space-y-4"
-                                    >
-                                        <p>{activeGame.description}</p>
-                                        <div className="flex gap-4 pt-4">
-                                            <Link
-                                                href={`/Games?game=${activeGame.id}`}
-                                                className="px-6 py-3 bg-cyan-500 hover:bg-cyan-600 rounded-lg font-medium text-white transition-colors flex items-center gap-2"
-                                            >
-                                                Play Now <FiArrowRight />
-                                            </Link>
+                                {/* Right Side: Content */}
+                                <div className="w-full md:w-1/2 p-6 flex flex-col justify-between bg-[#fffbef]">
+                                    <div>
+                                        <div className="flex justify-between items-start mb-4">
+                                            <h2 className="text-3xl font-black text-black leading-tight">
+                                                {activeGame.name}
+                                            </h2>
                                             <button
                                                 onClick={() => setActiveGame(null)}
-                                                className="px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium text-white transition-colors"
+                                                className="bg-red-500 text-white p-1 border-2 border-black shadow-[2px_2px_0px_0px_#000000] active:shadow-none active:translate-y-1"
                                             >
-                                                Close
+                                                [X]
                                             </button>
                                         </div>
-                                    </motion.div>
+                                        <span className="bg-blue-500 text-white px-2 py-1 border-2 border-black font-bold text-xs shadow-[2px_2px_0px_0px_#000000]">
+                                            {activeGame.type}
+                                        </span>
+                                        <p className="mt-6 text-sm font-medium leading-relaxed text-gray-800">
+                                            {activeGame.description}
+                                        </p>
+                                    </div>
+
+                                    <div className="mt-8">
+                                        <Link
+                                            href={`/Games?game=${activeGame.id}`}
+                                            className="w-full flex justify-center items-center gap-2 bg-yellow-400 py-4 font-black text-black text-lg border-4 border-black shadow-[6px_6px_0px_0px_#000000] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all"
+                                        >
+                                            <FiPlay size={20} className="fill-black" />
+                                            PLAY NOW
+                                        </Link>
+                                    </div>
                                 </div>
                             </motion.div>
                         </div>

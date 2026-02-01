@@ -1,5 +1,30 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Outfit:wght@400;700;900&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
+
+.font-retro {
+  font-family: 'Press Start 2P', cursive;
+}
+
+.font-main {
+  font-family: 'Outfit', sans-serif;
+}
+
+.bg-grid-pattern {
+  background-color: #ffffff;
+  background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.neubrutalism-shadow {
+  box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1);
+}
+
+.neubrutalism-shadow-hover:hover {
+  box-shadow: 12px 12px 0px 0px rgba(0, 0, 0, 1);
+  transform: translate(-2px, -2px);
+}
 
 @custom-variant dark (&:is(.dark *));
 
@@ -116,6 +141,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }

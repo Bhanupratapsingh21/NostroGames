@@ -7,7 +7,13 @@ interface EmulatorContainerProps {
 
 export default function EmulatorContainer({ romUrl }: EmulatorContainerProps) {
   const [srcDoc, setSrcDoc] = useState<string>('');
+  const [isMobile, setIsMobile] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  useEffect(() => {
+    // Detect if device is mobile/touch-enabled
+    setIsMobile('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  }, []);
 
   useEffect(() => {
     if (!romUrl) {
@@ -15,40 +21,47 @@ export default function EmulatorContainer({ romUrl }: EmulatorContainerProps) {
       return;
     }
 
-    // When romUrl changes, generate new HTML for the iframe
     const html = `
       <!DOCTYPE html>
       <html lang="en">
         <head>
           <meta charset="UTF-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
           <style>
-            /* Make body fill the iframe completely */
-            html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: black; }
+            html, body { 
+              margin: 0; 
+              padding: 0; 
+              width: 100%; 
+              height: 100%; 
+              overflow: hidden; 
+              background: black; 
+              touch-action: none;
+            }
             #game { width: 100%; height: 100%; }
           </style>
         </head>
         <body>
-          <!-- The container where EmulatorJS will render -->
           <div id="game"></div>
-
           <script>
-            // Expose EJS_* on window inside the iframe
             window.EJS_player = '#game';
             window.EJS_core = 'nes';
             window.EJS_pathtodata = 'https://cdn.emulatorjs.org/latest/data/';
             window.EJS_gameUrl = '${romUrl}';
+            
+            // Enable mobile virtual controls
+            window.EJS_mobile = true;
+            
+            // Additional mobile-friendly settings
+            window.EJS_gameParent = '#game';
+            window.EJS_biosUrl = '';
+            window.EJS_gameName = 'Retro Game';
+            window.EJS_color = '#000000';
+            window.EJS_startOnLoaded = true;
           </script>
-          <!-- Load EmulatorJS’s loader.js -->
           <script
             src="https://cdn.emulatorjs.org/latest/data/loader.js"
             onerror="console.error('Failed to load EmulatorJS loader.js')"
           ></script>
-
-          <script>
-            // Ensure the game auto-starts (EmulatorJS does that by default once script loads)
-            // Optionally, if you need to force-run EJS, you can do so here.
-          </script>
         </body>
       </html>
     `.trim();
@@ -56,13 +69,21 @@ export default function EmulatorContainer({ romUrl }: EmulatorContainerProps) {
     setSrcDoc(html);
   }, [romUrl]);
 
-  // Whenever romUrl changes or mounts, React will reload the <iframe> with new srcDoc.
   return (
-    <iframe
-      ref={iframeRef}
-      srcDoc={srcDoc}
-      sandbox="allow-scripts allow-same-origin"
-      style={{ width: '100%', height: '100%', border: 'none' }}
-    />
+    <div className="relative w-full h-full">
+      <iframe
+        ref={iframeRef}
+        srcDoc={srcDoc}
+        sandbox="allow-scripts allow-same-origin"
+        style={{ width: '100%', height: '100%', border: 'none' }}
+      />
+      
+      {/* Optional: Show mobile indicator */}
+      {isMobile && (
+        <div className="absolute top-2 right-2 bg-green-500/80 text-white text-xs px-2 py-1 rounded font-bold z-10 pointer-events-none">
+          TOUCH CONTROLS ON
+        </div>
+      )}
+    </div>
   );
 }
